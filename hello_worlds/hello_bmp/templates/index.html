@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados do Sensor</title>
+    <!-- Importa a biblioteca Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+    <!-- Estilo CSS -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f7;
+            color: #333;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        h1 {
+            color: #4CAF50;
+            margin-top: 30px;
+            font-size: 2.5em;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin: 10px;
+        }
+
+        span {
+            font-weight: bold;
+        }
+
+        #temp, #hum, #press, #luz {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #temp {
+            transition: color 0.5s, background-color 0.5s;
+        }
+
+        #hum {
+            transition: color 0.5s, background-color 0.5s;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Monitoramento de Temperatura e Umidade</h1>
+    <p>Temperatura: <span id="temp">Aguardando dados...</span></p>
+    <p>Umidade: <span id="hum">Aguardando dados...</span></p>
+    <p>Pressão: <span id="press">Aguardando dados...</span></p>
+    <p>Luz: <span id="luz">Aguardando dados...</span></p>
+
+    <script>
+        // Função para atualizar os valores no HTML
+        function atualizarDados(temperatura, umidade, pressao, luz) {
+            document.getElementById('temp').innerText = temperatura + " °C";
+            if (temperatura > 30) {
+                document.getElementById('temp').style.color = 'red';
+                document.getElementById('temp').style.backgroundColor = '#ffe6e6';
+            } else {
+                document.getElementById('temp').style.color = 'black';
+                document.getElementById('temp').style.backgroundColor = '#fff';
+            }
+            document.getElementById('hum').innerText = umidade + " %";
+            if (umidade > 70) {
+                document.getElementById('hum').style.color = 'blue';
+                document.getElementById('hum').style.backgroundColor = '#e6f7ff';
+            } else {
+                document.getElementById('hum').style.color = 'black';
+                document.getElementById('hum').style.backgroundColor = '#fff';
+            }
+            document.getElementById('press').innerText = pressao + " hPa";
+            document.getElementById('press').style.color = 'black';
+            document.getElementById('press').style.backgroundColor = '#fff';
+
+            document.getElementById('luz').innerText = luz + " Lux";
+            document.getElementById('luz').style.color = 'black';
+            document.getElementById('luz').style.backgroundColor = '#fff';
+        }
+
+        // Inicializar a conexão WebSocket com o servidor Flask
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Ouvir por novos dados enviados via WebSocket
+        socket.on('sensor_data', function(data) {
+            console.log("Dados recebidos via WebSocket:", data);
+            atualizarDados(data.Temperatura, data.Umidade, data.Pressao, data.Luz);
+        });
+
+        // Função para fazer requisição inicial ao servidor via HTTP e obter os últimos dados
+        function consultarDadosSensor() {
+            fetch('/sensor')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.log(data.error);
+                    } else {
+                        atualizarDados(data.Temperatura, data.Umidade, data.Pressao, data.Luz);
+                    }
+                })
+                .catch(error => console.error('Erro ao consultar dados do sensor:', error));
+        }
+
+        // Consultar dados do sensor quando a página carregar
+        window.onload = consultarDadosSensor;
+
+        // Consultar dados do sensor a cada 5 segundos
+        setInterval(consultarDadosSensor, 5000);
+    </script>
+
+    <footer>
+        Dados atualizados em tempo real
+    </footer>
+</body>
+</html>

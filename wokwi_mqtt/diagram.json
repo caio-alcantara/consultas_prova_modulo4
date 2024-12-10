@@ -1,0 +1,27 @@
+{
+    "version": 1,
+    "author": "Caio de Alcantara Santos",
+    "editor": "wokwi",
+    "parts": [
+      { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -28.8, "left": 91.24, "attrs": {} },
+      { "type": "wokwi-dht22", "id": "dht1", "top": -18.9, "left": -130.2, "attrs": {} },
+      {
+        "type": "wokwi-resistor",
+        "id": "r1",
+        "top": 128.2,
+        "left": -135.25,
+        "rotate": 270,
+        "attrs": { "value": "1000" }
+      }
+    ],
+    "connections": [
+      [ "esp:TX", "$serialMonitor:RX", "", [] ],
+      [ "esp:RX", "$serialMonitor:TX", "", [] ],
+      [ "dht1:VCC", "esp:5V", "red", [ "v0" ] ],
+      [ "dht1:GND", "esp:GND.1", "black", [ "v0" ] ],
+      [ "dht1:SDA", "r1:2", "red", [ "v0" ] ],
+      [ "r1:1", "esp:5V", "red", [ "v9.6", "h201.45" ] ],
+      [ "dht1:SDA", "esp:21", "green", [ "v9.6", "h163.3", "v-163.2", "h163.2", "v105.6" ] ]
+    ],
+    "dependencies": {}
+  }
